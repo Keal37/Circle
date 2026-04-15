@@ -10,53 +10,25 @@
 
 <body>
 
-<!-- =========================
-     HOME SCREEN
-========================= -->
-<div id="home" class="home">
+  <div class="chat-wrapper">
 
-  <h2>CIRCLE</h2>
+    <div class="top-bar">
+      CIRCLE
+    </div>
 
-  <p>Select or create a circle</p>
+    <div id="messages" class="messages"></div>
 
-  <div class="circle-list" id="circleList"></div>
+    <div class="input-bar">
+      <input id="msg" type="text" placeholder="Type message..." />
+      <button onclick="send()">Send</button>
+    </div>
 
-  <div class="create-circle">
-    <input id="newCircle" placeholder="Create circle..." />
-    <button onclick="createCircle()">+</button>
   </div>
 
-</div>
+  <div id="users" class="users-panel"></div>
 
-<!-- =========================
-     CHAT SCREEN
-========================= -->
-<div id="chat" class="chat hidden">
-
-  <div class="top-bar">
-    <div id="currentCircleName">#circle</div>
-    <button onclick="backHome()">Exit</button>
-  </div>
-
-  <div id="messages" class="messages"></div>
-
-  <div class="input-bar">
-    <input id="msg" type="text" placeholder="Type message..." />
-    <button onclick="send()">Send</button>
-  </div>
-
-</div>
-
-<!-- =========================
-     USERS PANEL
-========================= -->
-<div id="users" class="users-panel"></div>
-
-<!-- SOCKET.IO -->
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-
-<!-- APP LOGIC -->
-<script src="app.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="app.js"></script>
 
 </body>
 </html>
