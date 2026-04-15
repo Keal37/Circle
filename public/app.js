@@ -14,14 +14,12 @@ if (!username || username.trim() === "") {
   username = "anon";
 }
 
+username = username.trim();
+
 // --------------------
 // CIRCLE STATE
 // --------------------
-let currentCircle = localStorage.getItem("circle");
-
-if (!currentCircle) {
-  currentCircle = "";
-}
+let currentCircle = localStorage.getItem("circle") || "";
 
 // --------------------
 // AUTO REJOIN ON CONNECT
@@ -35,6 +33,23 @@ socket.on("connect", () => {
 });
 
 // --------------------
+// JOIN CIRCLE (called from UI button)
+// --------------------
+function joinCircle() {
+  const input = document.getElementById("circleInput");
+
+  currentCircle = input.value.trim().toLowerCase();
+
+  if (!currentCircle) return;
+
+  localStorage.setItem("circle", currentCircle);
+
+  socket.emit("joinCircle", currentCircle);
+
+  input.value = "";
+}
+
+// --------------------
 // SEND MESSAGE
 // --------------------
 function send() {
@@ -44,7 +59,7 @@ function send() {
   if (!text || !currentCircle) return;
 
   socket.emit("message", {
-    circle: currentCircle.trim().toLowerCase(),
+    circle: currentCircle,
     text,
     username
   });
@@ -53,7 +68,7 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE (UI + TIMESTAMP)
+// RECEIVE MESSAGE (FIXED + CLEAN UI)
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
@@ -68,7 +83,15 @@ socket.on("message", (data) => {
     minute: "2-digit"
   });
 
-  // YOU vs OTHERS styling
+  // content
+  div.innerHTML = `
+    <div><b>${data.username}</b>: ${data.text}</div>
+    <div style="font-size:10px; opacity:0.5; margin-top:3px;">
+      ${time}
+    </div>
+  `;
+
+  // alignment + color
   if (data.username === username) {
     div.style.alignSelf = "flex-end";
     div.style.background = "#3a7afe";
@@ -77,14 +100,8 @@ socket.on("message", (data) => {
     div.style.alignSelf = "flex-start";
   }
 
-  // message content + time
-  div.innerHTML = `
-    <div>${data.text}</div>
-    <div style="font-size:10px; opacity:0.5; margin-top:3px;">
-      ${time}
-    </div>
-  `;
-
   messages.appendChild(div);
+
+  // auto scroll
   messages.scrollTop = messages.scrollHeight;
 });
