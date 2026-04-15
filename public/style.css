@@ -1,15 +1,60 @@
 body {
-  font-family: Arial;
-  background: #111;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f0f0f;
   color: white;
+}
+
+/* wrapper */
+.chat-wrapper {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* top bar */
+.top-bar {
+  padding: 15px;
+  background: #1a1a1a;
+  font-weight: bold;
   text-align: center;
 }
 
-#messages {
-  margin-top: 20px;
-  height: 300px;
-  overflow-y: auto;
-  border: 1px solid #333;
+/* messages area */
+.messages {
+  flex: 1;
   padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
+/* message bubble */
+.msg {
+  max-width: 70%;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 10px;
+  background: #2a2a2a;
+  align-self: flex-start;
+}
+
+/* input bar */
+.input-bar {
+  display: flex;
+  padding: 10px;
+  background: #1a1a1a;
+}
+
+.input-bar input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  outline: none;
+}
+
+.input-bar button {
+  padding: 10px 15px;
+  margin-left: 10px;
+  cursor: pointer;
+}
