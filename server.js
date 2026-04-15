@@ -5,7 +5,6 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 
-// ✅ FIXED: CORS ADDED
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -15,35 +14,34 @@ const io = new Server(server, {
 
 app.use(express.static("public"));
 
-// users join a Circle (room)
+// --------------------
+// SOCKET LOGIC
+// --------------------
 io.on("connection", (socket) => {
+  console.log("USER CONNECTED:", socket.id);
 
+  // JOIN CIRCLE (IMPORTANT FIX)
   socket.on("joinCircle", (circleName) => {
+    socket.leaveAll(); // 🔥 prevents multiple room stacking
     socket.join(circleName);
+
+    console.log("JOINED:", circleName);
   });
 
+  // MESSAGE BROADCAST
   socket.on("message", (data) => {
+    console.log("MESSAGE:", data);
+
     io.to(data.circle).emit("message", data);
   });
 
+  socket.on("disconnect", () => {
+    console.log("USER DISCONNECTED:", socket.id);
+  });
 });
 
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
   console.log("CIRCLE running on port", PORT);
-});
-
-io.on("connection", (socket) => {
-  console.log("✅ USER CONNECTED");
-
-  socket.on("joinCircle", (circleName) => {
-    console.log("JOIN:", circleName);
-    socket.join(circleName);
-  });
-
-  socket.on("message", (data) => {
-    console.log("MESSAGE:", data);
-    io.to(data.circle).emit("message", data);
-  });
 });
