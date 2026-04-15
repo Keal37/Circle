@@ -1,9 +1,7 @@
-const socket = io("https://circle-backend-s7dz.onrender.com", {
-  transports: ["websocket"]
-});
+const socket = io("https://circle-backend-s7dz.onrender.com");
 
 // --------------------
-// USERNAME
+// USER
 // --------------------
 let username = prompt("Enter username:");
 
@@ -14,47 +12,87 @@ if (!username || username.trim() === "") {
 username = username.trim();
 
 // --------------------
-// CIRCLE
+// STATE
 // --------------------
-let currentCircle = localStorage.getItem("circle") || "";
+let currentCircle = "";
 
-// --------------------
-// CONNECT
-// --------------------
-socket.on("connect", () => {
-  console.log("CONNECTED:", socket.id);
-
-  if (currentCircle) {
-    socket.emit("joinCircle", currentCircle);
-  }
-});
+// default circles
+let circles = ["general", "dev", "random"];
 
 // --------------------
-// JOIN
+// INIT HOME
 // --------------------
-function joinCircle() {
-  const input = document.getElementById("circleInput");
+window.onload = () => {
+  renderCircles();
+};
 
-  if (!input) return;
+// --------------------
+// RENDER CIRCLES
+// --------------------
+function renderCircles() {
+  const list = document.getElementById("circleList");
 
-  currentCircle = input.value.trim().toLowerCase();
+  list.innerHTML = "";
 
-  if (!currentCircle) return;
+  circles.forEach((c) => {
+    const div = document.createElement("div");
+    div.classList.add("circle-item");
+    div.innerText = "#" + c;
 
-  localStorage.setItem("circle", currentCircle);
+    div.onclick = () => joinCircle(c);
 
-  socket.emit("joinCircle", currentCircle);
-
-  input.value = "";
+    list.appendChild(div);
+  });
 }
 
 // --------------------
-// SEND
+// CREATE CIRCLE
+// --------------------
+function createCircle() {
+  const input = document.getElementById("newCircle");
+
+  const name = input.value.trim().toLowerCase();
+
+  if (!name) return;
+
+  if (!circles.includes(name)) {
+    circles.push(name);
+  }
+
+  input.value = "";
+
+  renderCircles();
+}
+
+// --------------------
+// JOIN CIRCLE
+// --------------------
+function joinCircle(circle) {
+  currentCircle = circle;
+
+  socket.emit("joinCircle", circle);
+
+  document.getElementById("home").classList.add("hidden");
+  document.getElementById("chat").classList.remove("hidden");
+
+  document.getElementById("currentCircleName").innerText = "#" + circle;
+}
+
+// --------------------
+// BACK HOME
+// --------------------
+function backHome() {
+  currentCircle = "";
+
+  document.getElementById("chat").classList.add("hidden");
+  document.getElementById("home").classList.remove("hidden");
+}
+
+// --------------------
+// SEND MESSAGE
 // --------------------
 function send() {
   const input = document.getElementById("msg");
-
-  if (!input) return;
 
   const text = input.value.trim();
 
@@ -70,27 +108,15 @@ function send() {
 }
 
 // --------------------
-// RECEIVE
+// RECEIVE MESSAGE
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
 
-  if (!messages) return;
-
   const div = document.createElement("div");
   div.classList.add("msg");
 
-  const time = new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-
-  div.innerHTML = `
-    <div><b>${data.username}</b>: ${data.text}</div>
-    <div style="font-size:10px; opacity:0.5; margin-top:3px;">
-      ${time}
-    </div>
-  `;
+  div.innerHTML = `<b>${data.username}</b>: ${data.text}`;
 
   if (data.username === username) {
     div.style.alignSelf = "flex-end";
