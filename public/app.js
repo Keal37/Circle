@@ -31,6 +31,11 @@ function send() {
 
   if (!text || !currentCircle) return;
 
+  // show immediately (UX)
+  const div = document.createElement("div");
+  div.innerText = `${username}: ${text}`;
+  document.getElementById("messages").appendChild(div);
+
   socket.emit("message", {
     circle: currentCircle,
     text,
