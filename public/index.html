@@ -1,34 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>CIRCLE</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CIRCLE Chat</title>
+
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
-<div class="container">
+  <div class="chat-wrapper">
 
-  <h1>⚡ CIRCLE</h1>
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      CIRCLE
+    </div>
 
-  <input id="circleInput" placeholder="Enter Circle name" />
+    <!-- MESSAGES -->
+    <div id="messages" class="messages"></div>
 
-  <button onclick="joinCircle()">Join Circle</button>
+    <!-- INPUT BAR -->
+    <div class="input-bar">
+      <input id="msg" type="text" placeholder="Type a message..." />
+      <button onclick="send()">Send</button>
+    </div>
 
-</div>
+  </div>
 
-<script>
-function joinCircle() {
-  const circle = document.getElementById("circleInput").value.trim().toLowerCase();
+  <!-- 🔥 USERS PANEL (CORRECT PLACE) -->
+  <div id="users" class="users-panel"></div>
 
-  if (!circle) return;
+  <!-- SOCKET.IO -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
-  // save circle for chat page
-  localStorage.setItem("circle", circle);
-
-  // go to chat page
-  window.location.href = "/chat.html";
-}
-</script>
+  <!-- APP JS -->
+  <script src="app.js"></script>
 
 </body>
 </html>
