@@ -6,20 +6,29 @@
 </head>
 <body>
 
-<h2>⚡ CIRCLE</h2>
+<div class="container">
 
-<input id="circleInput" placeholder="Enter Circle name">
-<button onclick="joinCircle()">Join</button>
+  <h1>⚡ CIRCLE</h1>
 
-<hr>
+  <input id="circleInput" placeholder="Enter Circle name" />
 
-<div id="messages"></div>
+  <button onclick="joinCircle()">Join Circle</button>
 
-<input id="msg" placeholder="Message">
-<button onclick="send()">Send</button>
+</div>
 
-<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<script src="app.js"></script>
+<script>
+function joinCircle() {
+  const circle = document.getElementById("circleInput").value.trim().toLowerCase();
+
+  if (!circle) return;
+
+  // save circle for chat page
+  localStorage.setItem("circle", circle);
+
+  // go to chat page
+  window.location.href = "/chat.html";
+}
+</script>
 
 </body>
 </html>
