@@ -1,6 +1,4 @@
-const socket = io("https://circle-backend-s7dz.onrender.com", {
-  transports: ["websocket", "polling"]
-});
+const socket = io("https://circle-backend-s7dz.onrender.com");
 
 // --------------------
 // USERNAME SETUP
@@ -22,7 +20,10 @@ let currentCircle = "";
 // --------------------
 function joinCircle() {
   const input = document.getElementById("circleInput");
-  currentCircle = input.value;
+
+  if (!input.value.trim()) return;
+
+  currentCircle = input.value.trim();
 
   socket.emit("joinCircle", currentCircle);
 
@@ -33,7 +34,10 @@ function joinCircle() {
 // SEND MESSAGE
 // --------------------
 function send() {
-  const text = document.getElementById("msg").value;
+  const msgInput = document.getElementById("msg");
+  const text = msgInput.value.trim();
+
+  if (!text) return;
 
   if (!currentCircle) {
     alert("Join a Circle first!");
@@ -46,16 +50,17 @@ function send() {
     username: username
   });
 
-  document.getElementById("msg").value = "";
+  msgInput.value = "";
 }
 
 // --------------------
 // RECEIVE MESSAGE
 // --------------------
 socket.on("message", (data) => {
-  const div = document.createElement("div");
+  const messagesDiv = document.getElementById("messages");
 
+  const div = document.createElement("div");
   div.innerText = `${data.username}: ${data.text}`;
 
-  document.getElementById("messages").appendChild(div);
+  messagesDiv.appendChild(div);
 });
