@@ -14,29 +14,31 @@ const io = new Server(server, {
 
 app.use(express.static("public"));
 
-// --------------------
-// SOCKET LOGIC
-// --------------------
 io.on("connection", (socket) => {
-  console.log("USER CONNECTED:", socket.id);
+  console.log("CONNECTED:", socket.id);
 
-  // JOIN CIRCLE (IMPORTANT FIX)
   socket.on("joinCircle", (circleName) => {
-    socket.leaveAll(); // 🔥 prevents multiple room stacking
-    socket.join(circleName);
+    const room = circleName.trim().toLowerCase();
 
-    console.log("JOINED:", circleName);
+    console.log("JOIN:", socket.id, room);
+
+    socket.join(room);
   });
 
-  // MESSAGE BROADCAST
   socket.on("message", (data) => {
-    console.log("MESSAGE:", data);
+    const payload = {
+      username: data.username,
+      text: data.text,
+      circle: data.circle.trim().toLowerCase()
+    };
 
-    io.to(data.circle).emit("message", data);
+    console.log("MESSAGE:", payload);
+
+    io.to(payload.circle).emit("message", payload);
   });
 
   socket.on("disconnect", () => {
-    console.log("USER DISCONNECTED:", socket.id);
+    console.log("DISCONNECTED:", socket.id);
   });
 });
 
