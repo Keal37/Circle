@@ -1,8 +1,6 @@
 const socket = io("https://circle-backend-s7dz.onrender.com", {
   transports: ["websocket"],
-  reconnection: true,
-  reconnectionAttempts: 10,
-  timeout: 20000
+  reconnection: true
 });
 
 // --------------------
@@ -17,26 +15,28 @@ if (!username || username.trim() === "") {
 username = username.trim();
 
 // --------------------
-// CIRCLE STATE
+// CIRCLE
 // --------------------
 let currentCircle = localStorage.getItem("circle") || "";
 
 // --------------------
-// AUTO REJOIN
+// CONNECT / REJOIN
 // --------------------
 socket.on("connect", () => {
   console.log("CONNECTED:", socket.id);
 
   if (currentCircle) {
-    socket.emit("joinCircle", currentCircle.trim().toLowerCase());
+    socket.emit("joinCircle", currentCircle);
   }
 });
 
 // --------------------
-// JOIN CIRCLE
+// JOIN CIRCLE (IMPORTANT SAFETY)
 // --------------------
 function joinCircle() {
   const input = document.getElementById("circleInput");
+
+  if (!input) return;
 
   currentCircle = input.value.trim().toLowerCase();
 
@@ -50,10 +50,13 @@ function joinCircle() {
 }
 
 // --------------------
-// SEND MESSAGE
+// SEND MESSAGE (SAFE)
 // --------------------
 function send() {
   const input = document.getElementById("msg");
+
+  if (!input) return;
+
   const text = input.value.trim();
 
   if (!text || !currentCircle) return;
@@ -68,10 +71,12 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE (GROUPING LOGIC)
+// RECEIVE MESSAGE (SAFE GROUPING)
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
+
+  if (!messages) return;
 
   const lastMsg = messages.lastElementChild;
 
@@ -79,31 +84,27 @@ socket.on("message", (data) => {
     lastMsg &&
     lastMsg.getAttribute("data-user") === data.username;
 
-  const now = new Date();
-  const time = now.toLocaleTimeString([], {
+  const time = new Date().toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit"
   });
 
-  // --------------------
-  // GROUP INTO EXISTING BUBBLE
-  // --------------------
+  // GROUPING
   if (isSameUser) {
     const textGroup = lastMsg.querySelector(".text-group");
 
-    const newLine = document.createElement("div");
-    newLine.innerText = data.text;
-    newLine.style.marginTop = "4px";
-
-    textGroup.appendChild(newLine);
+    if (textGroup) {
+      const newLine = document.createElement("div");
+      newLine.innerText = data.text;
+      newLine.style.marginTop = "4px";
+      textGroup.appendChild(newLine);
+    }
 
     messages.scrollTop = messages.scrollHeight;
     return;
   }
 
-  // --------------------
-  // NEW MESSAGE BLOCK
-  // --------------------
+  // NEW MESSAGE
   const div = document.createElement("div");
   div.classList.add("msg");
   div.setAttribute("data-user", data.username);
@@ -122,17 +123,12 @@ socket.on("message", (data) => {
     </div>
   `;
 
-  // alignment + color
   if (data.username === username) {
     div.style.alignSelf = "flex-end";
     div.style.background = "#3a7afe";
     div.style.color = "white";
-  } else {
-    div.style.alignSelf = "flex-start";
   }
 
   messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-});  // auto scroll
   messages.scrollTop = messages.scrollHeight;
 });
