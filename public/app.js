@@ -49,3 +49,9 @@ socket.on("message", (data) => {
   // auto scroll to latest
   messages.scrollTop = messages.scrollHeight;
 });
+
+function handleKey(e) {
+  if (e.key === "Enter") {
+    send();
+  }
+}
