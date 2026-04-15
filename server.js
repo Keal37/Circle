@@ -4,7 +4,14 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+
+// ✅ FIXED: CORS ADDED
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 
 app.use(express.static("public"));
 
@@ -16,7 +23,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("message", (data) => {
-    // data = { circle, text }
     io.to(data.circle).emit("message", data);
   });
 
