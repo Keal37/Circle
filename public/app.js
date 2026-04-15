@@ -9,7 +9,6 @@ const socket = io("https://circle-backend-s7dz.onrender.com", {
 // USERNAME
 // --------------------
 let username = prompt("Enter username:");
-
 if (!username || username.trim() === "") {
   username = "anon";
 }
@@ -49,12 +48,14 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE
+// RECEIVE MESSAGE (UI VERSION)
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
 
   const div = document.createElement("div");
+  div.className = "msg";
+
   div.innerText = `${data.username}: ${data.text}`;
 
   messages.appendChild(div);
