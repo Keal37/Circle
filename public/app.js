@@ -1,19 +1,16 @@
-/**
- * Prevent duplicate socket instances (important for Netlify reload behavior)
- */
-if (window.socket) {
-  window.socket.disconnect();
-}
-
-window.socket = io("https://circle-backend-s7dz.onrender.com");
-const socket = window.socket;
+const socket = io("https://circle-backend-s7dz.onrender.com");
 
 // --------------------
 // USERNAME
 // --------------------
-let username = prompt("Enter username:");
-if (!username || username.trim() === "") {
-  username = "anon";
+let username = localStorage.getItem("username");
+
+if (!username || username === "null") {
+  username = prompt("Enter username:");
+  if (!username || username.trim() === "") {
+    username = "anon";
+  }
+  localStorage.setItem("username", username);
 }
 
 // --------------------
@@ -27,9 +24,9 @@ let currentCircle = "";
 function joinCircle() {
   const input = document.getElementById("circleInput");
 
-  if (!input.value.trim()) return;
+  currentCircle = input.value.trim().toLowerCase();
 
-  currentCircle = input.value.trim();
+  if (!currentCircle) return;
 
   socket.emit("joinCircle", currentCircle);
 
@@ -55,19 +52,13 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE (FIXED DUPLICATION)
+// RECEIVE MESSAGE
 // --------------------
-
-// IMPORTANT: ensure only one listener exists
-socket.removeAllListeners("message");
-
 socket.on("message", (data) => {
-  const messagesDiv = document.getElementById("messages");
-
   const div = document.createElement("div");
   div.innerText = `${data.username}: ${data.text}`;
 
-  messagesDiv.appendChild(div);
+  document.getElementById("messages").appendChild(div);
 });
 
 // --------------------
