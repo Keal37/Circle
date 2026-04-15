@@ -20,13 +20,13 @@ username = username.trim();
 let currentCircle = localStorage.getItem("circle") || "";
 
 // --------------------
-// AUTO RECONNECT
+// CONNECT + REJOIN
 // --------------------
 socket.on("connect", () => {
   console.log("CONNECTED:", socket.id);
 
   if (currentCircle) {
-    socket.emit("joinCircle", currentCircle.trim().toLowerCase());
+    socket.emit("joinCircle", currentCircle);
   }
 });
 
@@ -35,8 +35,6 @@ socket.on("connect", () => {
 // --------------------
 function joinCircle() {
   const input = document.getElementById("circleInput");
-
-  if (!input) return;
 
   currentCircle = input.value.trim().toLowerCase();
 
@@ -55,8 +53,6 @@ function joinCircle() {
 function send() {
   const input = document.getElementById("msg");
 
-  if (!input) return;
-
   const text = input.value.trim();
 
   if (!text || !currentCircle) return;
@@ -71,66 +67,64 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE (CLEAN VERSION - NO GROUPING)
+// RECEIVE MESSAGE (GROUPED LOGIC)
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
 
-  if (!messages) return;
+  const lastBlock = messages.lastElementChild;
 
-  const div = document.createElement("div");
-  div.classList.add("msg");
+  const isSameUser =
+    lastBlock &&
+    lastBlock.getAttribute("data-user") === data.username;
 
   const time = new Date().toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit"
   });
 
-  div.innerHTML = `
-    <div><b>${data.username}</b>: ${data.text}</div>
-    <div style="font-size:10px; opacity:0.5; margin-top:3px;">
-      ${time}
-    </div>
-  `;
+  // ------------------------
+  // CONTINUE EXISTING GROUP
+  // ------------------------
+  if (isSameUser) {
+    const body = lastBlock.querySelector(".msg-body");
 
-  // styling (you vs others)
-  if (data.username === username) {
-    div.style.alignSelf = "flex-end";
-    div.style.background = "#3a7afe";
-    div.style.color = "white";
-  } else {
-    div.style.alignSelf = "flex-start";
+    const line = document.createElement("div");
+    line.innerText = data.text;
+    line.style.marginTop = "4px";
+
+    body.appendChild(line);
+
+    messages.scrollTop = messages.scrollHeight;
+    return;
   }
 
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-});  }
+  // ------------------------
+  // NEW MESSAGE GROUP
+  // ------------------------
+  const block = document.createElement("div");
+  block.classList.add("msg");
+  block.setAttribute("data-user", data.username);
 
-  // NEW MESSAGE
-  const div = document.createElement("div");
-  div.classList.add("msg");
-  div.setAttribute("data-user", data.username);
+  block.innerHTML = `
+    <div class="msg-user">${data.username}</div>
 
-  div.innerHTML = `
-    <div style="font-size:12px; opacity:0.7; margin-bottom:4px;">
-      <b>${data.username}</b>
-    </div>
-
-    <div class="text-group">
+    <div class="msg-body">
       <div>${data.text}</div>
     </div>
 
-    <div style="font-size:10px; opacity:0.5; margin-top:5px;">
-      ${time}
-    </div>
+    <div class="msg-time">${time}</div>
   `;
 
+  // alignment + styling
   if (data.username === username) {
-    div.style.alignSelf = "flex-end";
-    div.style.background = "#3a7afe";
-    div.style.color = "white";
+    block.style.alignSelf = "flex-end";
+    block.style.background = "#3a7afe";
+    block.style.color = "white";
+  } else {
+    block.style.alignSelf = "flex-start";
   }
 
-  messages.appendChild(div);
+  messages.appendChild(block);
   messages.scrollTop = messages.scrollHeight;
 });
