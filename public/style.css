@@ -58,14 +58,17 @@ body {
 /* MESSAGE BUBBLES */
 /* -------------------- */
 .msg {
-  max-width: 75%;
   padding: 10px 12px;
   border-radius: 14px;
   background: #2a2a2a;
+
   align-self: flex-start;
+
   font-size: 14px;
   line-height: 1.4;
   word-wrap: break-word;
+
+  margin: 2px 0;   /* 🔥 tighter grouping */
 }
 
 /* -------------------- */
