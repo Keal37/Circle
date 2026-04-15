@@ -11,58 +11,48 @@
 
 <body>
 
-  <!-- -------------------- -->
-  <!-- CHAT WRAPPER -->
-  <!-- -------------------- -->
-  <div class="chat-wrapper">
+  <!-- DASHBOARD -->
+  <div id="dashboard" style="display:flex; height:100vh; flex-direction:column; justify-content:center; align-items:center; gap:10px; background:#0f0f0f; color:white;">
 
-    <!-- TOP BAR -->
-    <div class="top-bar">
-      CIRCLE
-    </div>
+    <h2>CIRCLE</h2>
 
-    <!-- -------------------- -->
-    <!-- JOIN / CIRCLE INPUT -->
-    <!-- -------------------- -->
+    <input
+      id="newCircle"
+      placeholder="Enter circle name..."
+      style="padding:12px; width:220px; border-radius:8px; border:none;"
+    />
+
+    <button
+      onclick="openCircle()"
+      style="padding:12px 18px; border:none; border-radius:8px; background:#3a7afe; color:white;"
+    >
+      Enter Circle
+    </button>
+
+  </div>
+
+  <!-- CHAT (YOUR OLD APP WRAPPED INSIDE) -->
+  <div class="chat-wrapper" style="display:none;">
+
+    <div class="top-bar">CIRCLE</div>
+
     <div style="padding:10px; display:flex; gap:8px; background:#111;">
-      <input
-        id="circleInput"
-        placeholder="Enter circle name..."
-        style="flex:1; padding:10px; border:none; border-radius:8px;"
-      />
-
+      <input id="circleInput" placeholder="Join circle..." style="flex:1; padding:10px; border:none; border-radius:8px;" />
       <button onclick="joinCircle()" style="padding:10px; border:none; border-radius:8px; background:#3a7afe; color:white;">
         Join
       </button>
     </div>
 
-    <!-- -------------------- -->
-    <!-- MESSAGES -->
-    <!-- -------------------- -->
     <div id="messages" class="messages"></div>
 
-    <!-- -------------------- -->
-    <!-- INPUT BAR -->
-    <!-- -------------------- -->
     <div class="input-bar">
-
-      <input
-        id="msg"
-        placeholder="Type a message..."
-      />
-
-      <button onclick="send()">
-        Send
-      </button>
-
+      <input id="msg" placeholder="Type message..." />
+      <button onclick="send()">Send</button>
     </div>
 
   </div>
 
-  <!-- SOCKET.IO -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-
-  <!-- APP LOGIC -->
   <script src="app.js"></script>
 
 </body>
