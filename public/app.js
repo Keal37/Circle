@@ -18,6 +18,11 @@ if (!username || username.trim() === "") {
 // --------------------
 let currentCircle = localStorage.getItem("circle");
 
+// fallback safety
+if (!currentCircle) {
+  currentCircle = "";
+}
+
 // --------------------
 // AUTO JOIN ON CONNECT / RECONNECT
 // --------------------
@@ -48,18 +53,25 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE (UI VERSION)
+// RECEIVE MESSAGE (STEP 1 UI BUBBLES)
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
 
   const div = document.createElement("div");
-  div.className = "msg";
+  div.classList.add("msg");
 
-  div.innerText = `${data.username}: ${data.text}`;
+  // YOU vs OTHERS
+  if (data.username === username) {
+    div.style.alignSelf = "flex-end";
+    div.style.background = "#3a7afe";
+    div.style.color = "white";
+  } else {
+    div.style.alignSelf = "flex-start";
+  }
+
+  div.innerText = data.text;
 
   messages.appendChild(div);
-
-  // auto scroll
   messages.scrollTop = messages.scrollHeight;
 });
