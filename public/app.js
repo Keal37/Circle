@@ -128,3 +128,25 @@ socket.on("message", (data) => {
   messages.appendChild(block);
   messages.scrollTop = messages.scrollHeight;
 });
+
+function openCircle() {
+  const input = document.getElementById("newCircle");
+
+  const circle = input.value.trim().toLowerCase();
+
+  if (!circle) return;
+
+  // set current circle
+  currentCircle = circle;
+  localStorage.setItem("circle", circle);
+
+  // hide dashboard
+  document.getElementById("dashboard").style.display = "none";
+
+  // show chat
+  document.querySelector(".chat-wrapper").style.display = "flex";
+
+  // join socket room
+  socket.emit("joinCircle", circle);
+}
+
