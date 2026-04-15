@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CIRCLE</title>
+  <title>CIRCLE Chat</title>
 
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -12,22 +12,29 @@
 
   <div class="chat-wrapper">
 
+    <!-- TOP BAR -->
     <div class="top-bar">
       CIRCLE
     </div>
 
+    <!-- MESSAGES -->
     <div id="messages" class="messages"></div>
 
+    <!-- INPUT BAR -->
     <div class="input-bar">
-      <input id="msg" type="text" placeholder="Type message..." />
+      <input id="msg" type="text" placeholder="Type a message..." />
       <button onclick="send()">Send</button>
     </div>
 
   </div>
 
+  <!-- 🔥 USERS PANEL (CORRECT PLACE) -->
   <div id="users" class="users-panel"></div>
 
+  <!-- SOCKET.IO -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+  <!-- APP JS -->
   <script src="app.js"></script>
 
 </body>
