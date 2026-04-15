@@ -1,6 +1,5 @@
 const socket = io("https://circle-backend-s7dz.onrender.com", {
-  transports: ["websocket"],
-  reconnection: true
+  transports: ["websocket"]
 });
 
 // --------------------
@@ -15,7 +14,7 @@ if (!username || username.trim() === "") {
 username = username.trim();
 
 // --------------------
-// CIRCLE STATE
+// CIRCLE
 // --------------------
 let currentCircle = localStorage.getItem("circle") || "";
 
@@ -28,19 +27,15 @@ socket.on("connect", () => {
   if (currentCircle) {
     socket.emit("joinCircle", currentCircle);
   }
-
-  // tell server we're online
-  socket.emit("userOnline", {
-    username,
-    circle: currentCircle
-  });
 });
 
 // --------------------
-// JOIN CIRCLE
+// JOIN
 // --------------------
 function joinCircle() {
   const input = document.getElementById("circleInput");
+
+  if (!input) return;
 
   currentCircle = input.value.trim().toLowerCase();
 
@@ -50,20 +45,16 @@ function joinCircle() {
 
   socket.emit("joinCircle", currentCircle);
 
-  // update online status
-  socket.emit("userOnline", {
-    username,
-    circle: currentCircle
-  });
-
   input.value = "";
 }
 
 // --------------------
-// SEND MESSAGE
+// SEND
 // --------------------
 function send() {
   const input = document.getElementById("msg");
+
+  if (!input) return;
 
   const text = input.value.trim();
 
@@ -79,99 +70,34 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE (GROUPED)
+// RECEIVE
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
 
-  const lastBlock = messages.lastElementChild;
+  if (!messages) return;
 
-  const isSameUser =
-    lastBlock &&
-    lastBlock.getAttribute("data-user") === data.username;
+  const div = document.createElement("div");
+  div.classList.add("msg");
 
   const time = new Date().toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit"
   });
 
-  // CONTINUE GROUP
-  if (isSameUser) {
-    const body = lastBlock.querySelector(".msg-body");
-
-    const line = document.createElement("div");
-    line.innerText = data.text;
-    line.style.marginTop = "4px";
-
-    body.appendChild(line);
-
-    messages.scrollTop = messages.scrollHeight;
-    return;
-  }
-
-  // NEW GROUP
-  const block = document.createElement("div");
-  block.classList.add("msg");
-  block.setAttribute("data-user", data.username);
-
-  block.innerHTML = `
-    <div class="msg-user">${data.username}</div>
-
-    <div class="msg-body">
-      <div>${data.text}</div>
+  div.innerHTML = `
+    <div><b>${data.username}</b>: ${data.text}</div>
+    <div style="font-size:10px; opacity:0.5; margin-top:3px;">
+      ${time}
     </div>
-
-    <div class="msg-time">${time}</div>
   `;
 
   if (data.username === username) {
-    block.style.alignSelf = "flex-end";
-    block.style.background = "#3a7afe";
-    block.style.color = "white";
+    div.style.alignSelf = "flex-end";
+    div.style.background = "#3a7afe";
+    div.style.color = "white";
   }
 
-  messages.appendChild(block);
-  messages.scrollTop = messages.scrollHeight;
-});
-
-// --------------------
-// ONLINE USERS
-// --------------------
-socket.on("onlineUsers", (users) => {
-  const panel = document.getElementById("users");
-
-  if (!panel) return;
-
-  panel.innerHTML = "";
-
-  users.forEach((user) => {
-    const div = document.createElement("div");
-    div.innerText = "🟢 " + user;
-    panel.appendChild(div);
-  });
-});  const block = document.createElement("div");
-  block.classList.add("msg");
-  block.setAttribute("data-user", data.username);
-
-  block.innerHTML = `
-    <div class="msg-user">${data.username}</div>
-
-    <div class="msg-body">
-      <div>${data.text}</div>
-    </div>
-
-    <div class="msg-time">${time}</div>
-  `;
-
-  // alignment + styling
-  if (data.username === username) {
-    block.style.alignSelf = "flex-end";
-    block.style.background = "#3a7afe";
-    block.style.color = "white";
-  } else {
-    block.style.alignSelf = "flex-start";
-  }
-
-  messages.appendChild(block);
+  messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
 });
