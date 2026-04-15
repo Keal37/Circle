@@ -3,14 +3,10 @@ const socket = io("https://circle-backend-s7dz.onrender.com");
 // --------------------
 // USERNAME
 // --------------------
-let username = localStorage.getItem("username");
-
-if (!username) {
-  username = prompt("Enter username:");
-  if (!username) username = "anon";
-  localStorage.setItem("username", username);
+let username = prompt("Enter username:");
+if (!username || username.trim() === "") {
+  username = "anon";
 }
-
 // --------------------
 // GET CIRCLE
 // --------------------
