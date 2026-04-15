@@ -18,7 +18,6 @@ if (!username || username.trim() === "") {
 // --------------------
 let currentCircle = localStorage.getItem("circle");
 
-// fallback safety
 if (!currentCircle) {
   currentCircle = "";
 }
@@ -53,13 +52,18 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE (STEP 1 UI BUBBLES)
+// RECEIVE MESSAGE (STEP 2 - TIMESTAMPS + BUBBLES)
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
 
   const div = document.createElement("div");
   div.classList.add("msg");
+
+  // TIME
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2, "0") + ":" +
+               now.getMinutes().toString().padStart(2, "0");
 
   // YOU vs OTHERS
   if (data.username === username) {
@@ -70,7 +74,13 @@ socket.on("message", (data) => {
     div.style.alignSelf = "flex-start";
   }
 
-  div.innerText = data.text;
+  // CONTENT
+  div.innerHTML = `
+    <div>${data.text}</div>
+    <div style="font-size:10px; opacity:0.6; margin-top:3px;">
+      ${time}
+    </div>
+  `;
 
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
