@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io("https://circle-backend-s7dz.onrender.com");
 
 let currentCircle = "";
 
