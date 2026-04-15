@@ -15,23 +15,23 @@ if (!username || username.trim() === "") {
 username = username.trim();
 
 // --------------------
-// CIRCLE
+// CIRCLE STATE
 // --------------------
 let currentCircle = localStorage.getItem("circle") || "";
 
 // --------------------
-// CONNECT / REJOIN
+// AUTO RECONNECT
 // --------------------
 socket.on("connect", () => {
   console.log("CONNECTED:", socket.id);
 
   if (currentCircle) {
-    socket.emit("joinCircle", currentCircle);
+    socket.emit("joinCircle", currentCircle.trim().toLowerCase());
   }
 });
 
 // --------------------
-// JOIN CIRCLE (IMPORTANT SAFETY)
+// JOIN CIRCLE
 // --------------------
 function joinCircle() {
   const input = document.getElementById("circleInput");
@@ -50,7 +50,7 @@ function joinCircle() {
 }
 
 // --------------------
-// SEND MESSAGE (SAFE)
+// SEND MESSAGE
 // --------------------
 function send() {
   const input = document.getElementById("msg");
@@ -71,38 +71,40 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE (SAFE GROUPING)
+// RECEIVE MESSAGE (CLEAN VERSION - NO GROUPING)
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
 
   if (!messages) return;
 
-  const lastMsg = messages.lastElementChild;
-
-  const isSameUser =
-    lastMsg &&
-    lastMsg.getAttribute("data-user") === data.username;
+  const div = document.createElement("div");
+  div.classList.add("msg");
 
   const time = new Date().toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit"
   });
 
-  // GROUPING
-  if (isSameUser) {
-    const textGroup = lastMsg.querySelector(".text-group");
+  div.innerHTML = `
+    <div><b>${data.username}</b>: ${data.text}</div>
+    <div style="font-size:10px; opacity:0.5; margin-top:3px;">
+      ${time}
+    </div>
+  `;
 
-    if (textGroup) {
-      const newLine = document.createElement("div");
-      newLine.innerText = data.text;
-      newLine.style.marginTop = "4px";
-      textGroup.appendChild(newLine);
-    }
-
-    messages.scrollTop = messages.scrollHeight;
-    return;
+  // styling (you vs others)
+  if (data.username === username) {
+    div.style.alignSelf = "flex-end";
+    div.style.background = "#3a7afe";
+    div.style.color = "white";
+  } else {
+    div.style.alignSelf = "flex-start";
   }
+
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+});  }
 
   // NEW MESSAGE
   const div = document.createElement("div");
