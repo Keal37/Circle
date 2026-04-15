@@ -22,7 +22,7 @@ username = username.trim();
 let currentCircle = localStorage.getItem("circle") || "";
 
 // --------------------
-// AUTO REJOIN ON CONNECT
+// AUTO REJOIN
 // --------------------
 socket.on("connect", () => {
   console.log("CONNECTED:", socket.id);
@@ -33,7 +33,7 @@ socket.on("connect", () => {
 });
 
 // --------------------
-// JOIN CIRCLE (called from UI button)
+// JOIN CIRCLE
 // --------------------
 function joinCircle() {
   const input = document.getElementById("circleInput");
@@ -68,25 +68,56 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE (FIXED + CLEAN UI)
+// RECEIVE MESSAGE (GROUPING LOGIC)
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
 
-  const div = document.createElement("div");
-  div.classList.add("msg");
+  const lastMsg = messages.lastElementChild;
 
-  // time
+  const isSameUser =
+    lastMsg &&
+    lastMsg.getAttribute("data-user") === data.username;
+
   const now = new Date();
   const time = now.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit"
   });
 
-  // content
+  // --------------------
+  // GROUP INTO EXISTING BUBBLE
+  // --------------------
+  if (isSameUser) {
+    const textGroup = lastMsg.querySelector(".text-group");
+
+    const newLine = document.createElement("div");
+    newLine.innerText = data.text;
+    newLine.style.marginTop = "4px";
+
+    textGroup.appendChild(newLine);
+
+    messages.scrollTop = messages.scrollHeight;
+    return;
+  }
+
+  // --------------------
+  // NEW MESSAGE BLOCK
+  // --------------------
+  const div = document.createElement("div");
+  div.classList.add("msg");
+  div.setAttribute("data-user", data.username);
+
   div.innerHTML = `
-    <div><b>${data.username}</b>: ${data.text}</div>
-    <div style="font-size:10px; opacity:0.5; margin-top:3px;">
+    <div style="font-size:12px; opacity:0.7; margin-bottom:4px;">
+      <b>${data.username}</b>
+    </div>
+
+    <div class="text-group">
+      <div>${data.text}</div>
+    </div>
+
+    <div style="font-size:10px; opacity:0.5; margin-top:5px;">
       ${time}
     </div>
   `;
@@ -101,7 +132,7 @@ socket.on("message", (data) => {
   }
 
   messages.appendChild(div);
-
-  // auto scroll
+  messages.scrollTop = messages.scrollHeight;
+});  // auto scroll
   messages.scrollTop = messages.scrollHeight;
 });
