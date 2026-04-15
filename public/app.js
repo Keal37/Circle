@@ -14,6 +14,15 @@ if (!username || username.trim() === "") {
 
 username = username.trim();
 
+
+let circles = JSON.parse(localStorage.getItem("circles") || "[]");
+
+function saveCircle(circle) {
+  if (!circles.includes(circle)) {
+    circles.push(circle);
+    localStorage.setItem("circles", JSON.stringify(circles));
+  }
+}
 // --------------------
 // CIRCLE STATE
 // --------------------
