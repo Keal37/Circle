@@ -145,6 +145,8 @@ function openCircle() {
 
   if (!circle) return;
 
+  saveCircle(circle);
+
   // set current circle
   currentCircle = circle;
   localStorage.setItem("circle", circle);
@@ -158,4 +160,50 @@ function openCircle() {
   // join socket room
   socket.emit("joinCircle", circle);
 }
+
+  function renderCircles() {
+  const dashboard = document.getElementById("dashboard");
+
+  const list = document.createElement("div");
+  list.style.marginTop = "20px";
+  list.style.width = "220px";
+
+  if (circles.length === 0) return;
+
+  list.innerHTML = "<h4 style='margin-bottom:10px;'>Recent Circles</h4>";
+
+  circles.forEach((c) => {
+    const item = document.createElement("div");
+
+    item.innerText = c;
+    item.style.padding = "10px";
+    item.style.marginBottom = "6px";
+    item.style.background = "#1a1a1a";
+    item.style.borderRadius = "8px";
+    item.style.cursor = "pointer";
+
+    item.onclick = () => {
+      openCircleFromList(c);
+    };
+
+    list.appendChild(item);
+  });
+
+  dashboard.appendChild(list);
+  }
+
+function openCircleFromList(circle) {
+  currentCircle = circle;
+  localStorage.setItem("circle", circle);
+
+  document.getElementById("dashboard").style.display = "none";
+  document.querySelector(".chat-wrapper").style.display = "flex";
+
+  socket.emit("joinCircle", circle);
+}
+window.onload = () => {
+  renderCircles();
+};
+
+
 
