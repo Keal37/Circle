@@ -12,7 +12,7 @@ if (!username) {
 }
 
 // --------------------
-// GET CIRCLE FROM HOME
+// GET CIRCLE
 // --------------------
 const currentCircle = localStorage.getItem("circle");
 
@@ -40,10 +40,16 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE
+// RECEIVE MESSAGE (UPDATED)
 // --------------------
 socket.on("message", (data) => {
+  const messages = document.getElementById("messages");
+
   const div = document.createElement("div");
   div.innerText = `${data.username}: ${data.text}`;
-  document.getElementById("messages").appendChild(div);
+
+  messages.appendChild(div);
+
+  // auto scroll to latest
+  messages.scrollTop = messages.scrollHeight;
 });
