@@ -20,7 +20,7 @@ username = username.trim();
 let currentCircle = localStorage.getItem("circle") || "";
 
 // --------------------
-// CONNECT + REJOIN
+// CONNECT
 // --------------------
 socket.on("connect", () => {
   console.log("CONNECTED:", socket.id);
@@ -28,6 +28,12 @@ socket.on("connect", () => {
   if (currentCircle) {
     socket.emit("joinCircle", currentCircle);
   }
+
+  // tell server we're online
+  socket.emit("userOnline", {
+    username,
+    circle: currentCircle
+  });
 });
 
 // --------------------
@@ -43,6 +49,12 @@ function joinCircle() {
   localStorage.setItem("circle", currentCircle);
 
   socket.emit("joinCircle", currentCircle);
+
+  // update online status
+  socket.emit("userOnline", {
+    username,
+    circle: currentCircle
+  });
 
   input.value = "";
 }
@@ -67,7 +79,7 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE (GROUPED LOGIC)
+// RECEIVE MESSAGE (GROUPED)
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
@@ -83,9 +95,7 @@ socket.on("message", (data) => {
     minute: "2-digit"
   });
 
-  // ------------------------
-  // CONTINUE EXISTING GROUP
-  // ------------------------
+  // CONTINUE GROUP
   if (isSameUser) {
     const body = lastBlock.querySelector(".msg-body");
 
@@ -99,10 +109,47 @@ socket.on("message", (data) => {
     return;
   }
 
-  // ------------------------
-  // NEW MESSAGE GROUP
-  // ------------------------
+  // NEW GROUP
   const block = document.createElement("div");
+  block.classList.add("msg");
+  block.setAttribute("data-user", data.username);
+
+  block.innerHTML = `
+    <div class="msg-user">${data.username}</div>
+
+    <div class="msg-body">
+      <div>${data.text}</div>
+    </div>
+
+    <div class="msg-time">${time}</div>
+  `;
+
+  if (data.username === username) {
+    block.style.alignSelf = "flex-end";
+    block.style.background = "#3a7afe";
+    block.style.color = "white";
+  }
+
+  messages.appendChild(block);
+  messages.scrollTop = messages.scrollHeight;
+});
+
+// --------------------
+// ONLINE USERS
+// --------------------
+socket.on("onlineUsers", (users) => {
+  const panel = document.getElementById("users");
+
+  if (!panel) return;
+
+  panel.innerHTML = "";
+
+  users.forEach((user) => {
+    const div = document.createElement("div");
+    div.innerText = "🟢 " + user;
+    panel.appendChild(div);
+  });
+});  const block = document.createElement("div");
   block.classList.add("msg");
   block.setAttribute("data-user", data.username);
 
