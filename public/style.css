@@ -13,7 +13,7 @@ body {
 }
 
 /* -------------------- */
-/* CHAT WRAPPER */
+/* MAIN WRAPPER */
 /* -------------------- */
 .chat-wrapper {
   flex: 1;
@@ -23,7 +23,7 @@ body {
 }
 
 /* -------------------- */
-/* TOP BAR (PRO HEADER) */
+/* TOP BAR */
 /* -------------------- */
 .top-bar {
   height: 58px;
@@ -51,28 +51,56 @@ body {
 
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 /* -------------------- */
-/* MESSAGE BUBBLES */
+/* MESSAGE BLOCK (GROUP CONTAINER) */
 /* -------------------- */
 .msg {
+  max-width: 75%;
   padding: 10px 12px;
   border-radius: 14px;
   background: #2a2a2a;
 
-  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
 
-  font-size: 14px;
-  line-height: 1.4;
   word-wrap: break-word;
-
-  margin: 2px 0;   /* 🔥 tighter grouping */
 }
 
 /* -------------------- */
-/* INPUT BAR (KEYBOARD SAFE FIX) */
+/* USERNAME (SEPARATE COLOR) */
+/* -------------------- */
+.msg-user {
+  font-weight: bold;
+  font-size: 12px;
+  margin-bottom: 5px;
+  color: #7db2ff;
+}
+
+/* -------------------- */
+/* MESSAGE BODY (STACKED LINES) */
+/* -------------------- */
+.msg-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* -------------------- */
+/* TIME STAMP */
+/* -------------------- */
+.msg-time {
+  font-size: 10px;
+  opacity: 0.5;
+  margin-top: 6px;
+}
+
+/* -------------------- */
+/* INPUT BAR (FIXED MOBILE SAFE) */
 /* -------------------- */
 .input-bar {
   display: flex;
@@ -81,7 +109,7 @@ body {
   gap: 10px;
   align-items: center;
 
-  flex-shrink: 0; /* 🔥 CRITICAL FIX: prevents disappearing */
+  flex-shrink: 0;
 }
 
 .input-bar input {
@@ -103,6 +131,31 @@ body {
   cursor: pointer;
 }
 
+/* -------------------- */
+/* YOUR OWN MESSAGES */
+/* -------------------- */
+.msg[style*="align-self: flex-end"] {
+  background: #3a7afe;
+  color: white;
+}
+
+/* -------------------- */
+/* MOBILE OPTIMIZATION */
+/* -------------------- */
+@media (max-width: 600px) {
+  .msg {
+    max-width: 85%;
+    font-size: 13px;
+  }
+
+  .input-bar input {
+    font-size: 14px;
+  }
+
+  .input-bar button {
+    font-size: 14px;
+  }
+}
 /* -------------------- */
 /* HOME SCREEN (SAFE UI) */
 /* -------------------- */
