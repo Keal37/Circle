@@ -1,7 +1,7 @@
 const socket = io("https://circle-backend-s7dz.onrender.com", {
   transports: ["websocket"],
   reconnection: true,
-  reconnectionAttempts: 5,
+  reconnectionAttempts: 10,
   timeout: 20000
 });
 
@@ -9,18 +9,26 @@ const socket = io("https://circle-backend-s7dz.onrender.com", {
 // USERNAME
 // --------------------
 let username = prompt("Enter username:");
+
 if (!username || username.trim() === "") {
   username = "anon";
 }
-// --------------------
-// GET CIRCLE
-// --------------------
-const currentCircle = localStorage.getItem("circle");
 
-// join automatically
-if (currentCircle) {
-  socket.emit("joinCircle", currentCircle);
-}
+// --------------------
+// CIRCLE STATE
+// --------------------
+let currentCircle = localStorage.getItem("circle");
+
+// --------------------
+// AUTO JOIN ON CONNECT / RECONNECT
+// --------------------
+socket.on("connect", () => {
+  console.log("CONNECTED:", socket.id);
+
+  if (currentCircle) {
+    socket.emit("joinCircle", currentCircle);
+  }
+});
 
 // --------------------
 // SEND MESSAGE
@@ -32,7 +40,7 @@ function send() {
   if (!text || !currentCircle) return;
 
   socket.emit("message", {
-    circle: currentCircle,
+    circle: currentCircle.trim().toLowerCase(),
     text,
     username
   });
@@ -41,7 +49,7 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE (UPDATED)
+// RECEIVE MESSAGE
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
@@ -51,12 +59,6 @@ socket.on("message", (data) => {
 
   messages.appendChild(div);
 
-  // auto scroll to latest
+  // auto scroll
   messages.scrollTop = messages.scrollHeight;
 });
-
-function handleKey(e) {
-  if (e.key === "Enter") {
-    send();
-  }
-}
