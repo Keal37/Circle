@@ -1,5 +1,11 @@
-const socket = io("https://circle-backend-s7dz.onrender.com");
+const socket = io("https://circle-backend-s7dz.onrender.com", {
+  transports: ["websocket"],
+  reconnection: true
+});
 
+// --------------------
+// USERNAME
+// --------------------
 let username = prompt("Enter username:");
 
 if (!username || username.trim() === "") {
@@ -8,19 +14,48 @@ if (!username || username.trim() === "") {
 
 username = username.trim();
 
-let currentCircle = "general";
+// --------------------
+// CIRCLE STATE
+// --------------------
+let currentCircle = localStorage.getItem("circle") || "";
 
-// join default circle
+// --------------------
+// CONNECT + REJOIN
+// --------------------
 socket.on("connect", () => {
-  socket.emit("joinCircle", currentCircle);
+  console.log("CONNECTED:", socket.id);
+
+  if (currentCircle) {
+    socket.emit("joinCircle", currentCircle);
+  }
 });
 
+// --------------------
+// JOIN CIRCLE
+// --------------------
+function joinCircle() {
+  const input = document.getElementById("circleInput");
+
+  currentCircle = input.value.trim().toLowerCase();
+
+  if (!currentCircle) return;
+
+  localStorage.setItem("circle", currentCircle);
+
+  socket.emit("joinCircle", currentCircle);
+
+  input.value = "";
+}
+
+// --------------------
 // SEND MESSAGE
+// --------------------
 function send() {
   const input = document.getElementById("msg");
+
   const text = input.value.trim();
 
-  if (!text) return;
+  if (!text || !currentCircle) return;
 
   socket.emit("message", {
     circle: currentCircle,
@@ -31,21 +66,65 @@ function send() {
   input.value = "";
 }
 
-// RECEIVE MESSAGE
+// --------------------
+// RECEIVE MESSAGE (GROUPED LOGIC)
+// --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
 
-  const div = document.createElement("div");
-  div.classList.add("msg");
+  const lastBlock = messages.lastElementChild;
 
-  div.innerHTML = `<b>${data.username}</b>: ${data.text}`;
+  const isSameUser =
+    lastBlock &&
+    lastBlock.getAttribute("data-user") === data.username;
 
-  if (data.username === username) {
-    div.style.alignSelf = "flex-end";
-    div.style.background = "#3a7afe";
-    div.style.color = "white";
+  const time = new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
+  // ------------------------
+  // CONTINUE EXISTING GROUP
+  // ------------------------
+  if (isSameUser) {
+    const body = lastBlock.querySelector(".msg-body");
+
+    const line = document.createElement("div");
+    line.innerText = data.text;
+    line.style.marginTop = "4px";
+
+    body.appendChild(line);
+
+    messages.scrollTop = messages.scrollHeight;
+    return;
   }
 
-  messages.appendChild(div);
+  // ------------------------
+  // NEW MESSAGE GROUP
+  // ------------------------
+  const block = document.createElement("div");
+  block.classList.add("msg");
+  block.setAttribute("data-user", data.username);
+
+  block.innerHTML = `
+    <div class="msg-user">${data.username}</div>
+
+    <div class="msg-body">
+      <div>${data.text}</div>
+    </div>
+
+    <div class="msg-time">${time}</div>
+  `;
+
+  // alignment + styling
+  if (data.username === username) {
+    block.style.alignSelf = "flex-end";
+    block.style.background = "#3a7afe";
+    block.style.color = "white";
+  } else {
+    block.style.alignSelf = "flex-start";
+  }
+
+  messages.appendChild(block);
   messages.scrollTop = messages.scrollHeight;
 });
