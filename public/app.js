@@ -1,4 +1,7 @@
-const socket = io("https://circle-backend-s7dz.onrender.com");
+const socket = io("https://circle-backend-s7dz.onrender.com", {
+  transports: ["websocket"],
+  upgrade: false
+});
 
 // --------------------
 // USERNAME SETUP
@@ -56,6 +59,10 @@ function send() {
 // --------------------
 // RECEIVE MESSAGE
 // --------------------
+
+// IMPORTANT: prevent duplicate listeners
+socket.removeAllListeners("message");
+
 socket.on("message", (data) => {
   const messagesDiv = document.getElementById("messages");
 
