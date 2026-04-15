@@ -11,7 +11,7 @@
 <div id="messages" style="height:70vh; overflow-y:auto;"></div>
 
 <div class="input-bar">
-  <input id="msg" placeholder="Message..." />
+  <input id="msg" placeholder="Message..." onkeypress="handleKey(event)" />
   <button onclick="send()">Send</button>
 </div>
 
