@@ -7,9 +7,11 @@ let username = localStorage.getItem("username");
 
 if (!username || username === "null") {
   username = prompt("Enter username:");
+
   if (!username || username.trim() === "") {
     username = "anon";
   }
+
   localStorage.setItem("username", username);
 }
 
@@ -24,11 +26,13 @@ let currentCircle = "";
 function joinCircle() {
   const input = document.getElementById("circleInput");
 
-  currentCircle = input.value.trim().toLowerCase();
+  const room = String(input.value || "").trim().toLowerCase();
 
-  if (!currentCircle) return;
+  if (!room) return;
 
-  socket.emit("joinCircle", currentCircle);
+  currentCircle = room;
+
+  socket.emit("joinCircle", room);
 
   input.value = "";
 }
@@ -38,6 +42,7 @@ function joinCircle() {
 // --------------------
 function send() {
   const msgInput = document.getElementById("msg");
+
   const text = msgInput.value.trim();
 
   if (!text || !currentCircle) return;
@@ -54,8 +59,11 @@ function send() {
 // --------------------
 // RECEIVE MESSAGE
 // --------------------
+socket.off("message");
+
 socket.on("message", (data) => {
   const div = document.createElement("div");
+
   div.innerText = `${data.username}: ${data.text}`;
 
   document.getElementById("messages").appendChild(div);
