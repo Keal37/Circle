@@ -1,4 +1,6 @@
-const socket = io("https://circle-backend-s7dz.onrender.com");
+const socket = io("https://circle-backend-s7dz.onrender.com", {
+  transports: ["websocket", "polling"]
+});
 
 // --------------------
 // USERNAME SETUP
