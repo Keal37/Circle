@@ -17,24 +17,24 @@ app.use(express.static("public"));
 io.on("connection", (socket) => {
   console.log("CONNECTED:", socket.id);
 
+  // JOIN ROOM
   socket.on("joinCircle", (circleName) => {
-    const room = circleName.trim().toLowerCase();
-
-    console.log("JOIN:", socket.id, room);
+    const room = String(circleName || "").trim().toLowerCase();
 
     socket.join(room);
+
+    console.log("JOIN:", socket.id, room);
   });
 
+  // MESSAGE
   socket.on("message", (data) => {
-    const payload = {
+    const room = String(data.circle || "").trim().toLowerCase();
+
+    io.to(room).emit("message", {
       username: data.username,
       text: data.text,
-      circle: data.circle.trim().toLowerCase()
-    };
-
-    console.log("MESSAGE:", payload);
-
-    io.to(payload.circle).emit("message", payload);
+      circle: room
+    });
   });
 
   socket.on("disconnect", () => {
