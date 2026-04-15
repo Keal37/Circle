@@ -9,6 +9,7 @@ const socket = io("https://circle-backend-s7dz.onrender.com", {
 // USERNAME
 // --------------------
 let username = prompt("Enter username:");
+
 if (!username || username.trim() === "") {
   username = "anon";
 }
@@ -23,13 +24,13 @@ if (!currentCircle) {
 }
 
 // --------------------
-// AUTO JOIN ON CONNECT / RECONNECT
+// AUTO REJOIN ON CONNECT
 // --------------------
 socket.on("connect", () => {
   console.log("CONNECTED:", socket.id);
 
   if (currentCircle) {
-    socket.emit("joinCircle", currentCircle);
+    socket.emit("joinCircle", currentCircle.trim().toLowerCase());
   }
 });
 
@@ -52,7 +53,7 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE (STEP 2 - TIMESTAMPS + BUBBLES)
+// RECEIVE MESSAGE (UI + TIMESTAMP)
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
@@ -60,12 +61,14 @@ socket.on("message", (data) => {
   const div = document.createElement("div");
   div.classList.add("msg");
 
-  // TIME
+  // time
   const now = new Date();
-  const time = now.getHours().toString().padStart(2, "0") + ":" +
-               now.getMinutes().toString().padStart(2, "0");
+  const time = now.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 
-  // YOU vs OTHERS
+  // YOU vs OTHERS styling
   if (data.username === username) {
     div.style.alignSelf = "flex-end";
     div.style.background = "#3a7afe";
@@ -74,10 +77,10 @@ socket.on("message", (data) => {
     div.style.alignSelf = "flex-start";
   }
 
-  // CONTENT
+  // message content + time
   div.innerHTML = `
     <div>${data.text}</div>
-    <div style="font-size:10px; opacity:0.6; margin-top:3px;">
+    <div style="font-size:10px; opacity:0.5; margin-top:3px;">
       ${time}
     </div>
   `;
