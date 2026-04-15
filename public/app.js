@@ -1,4 +1,9 @@
-const socket = io("https://circle-backend-s7dz.onrender.com");
+const socket = io("https://circle-backend-s7dz.onrender.com", {
+  transports: ["websocket"],
+  reconnection: true,
+  reconnectionAttempts: 5,
+  timeout: 20000
+});
 
 // --------------------
 // USERNAME
