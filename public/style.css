@@ -3,10 +3,12 @@ body {
   font-family: Arial, sans-serif;
   background: #0f0f0f;
   color: white;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* -------------------- */
-/* CHAT WRAPPER */
+/* CHAT WRAPPER (FULL SCREEN APP) */
 /* -------------------- */
 .chat-wrapper {
   height: 100vh;
@@ -18,10 +20,16 @@ body {
 /* TOP BAR */
 /* -------------------- */
 .top-bar {
-  padding: 15px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: #1a1a1a;
   font-weight: bold;
-  text-align: center;
+  font-size: 16px;
+  letter-spacing: 1px;
+  position: sticky;
+  top: 0;
 }
 
 /* -------------------- */
@@ -29,26 +37,25 @@ body {
 /* -------------------- */
 .messages {
   flex: 1;
-  padding: 10px;
+  padding: 12px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 /* -------------------- */
 /* MESSAGE BUBBLES */
 /* -------------------- */
 .msg {
-  max-width: 70%;
+  max-width: 75%;
   padding: 10px 12px;
-  margin: 6px 10px;
   border-radius: 14px;
   background: #2a2a2a;
   align-self: flex-start;
-  word-wrap: break-word;
   font-size: 14px;
   line-height: 1.4;
+  word-wrap: break-word;
 }
 
 /* -------------------- */
@@ -58,30 +65,31 @@ body {
   display: flex;
   padding: 10px;
   background: #1a1a1a;
+  gap: 10px;
+  align-items: center;
 }
 
 .input-bar input {
   flex: 1;
-  padding: 10px;
+  padding: 12px;
+  border-radius: 10px;
   border: none;
   outline: none;
-  border-radius: 8px;
   font-size: 14px;
 }
 
 .input-bar button {
-  padding: 10px 15px;
-  margin-left: 10px;
+  padding: 12px 16px;
+  border-radius: 10px;
   border: none;
-  border-radius: 8px;
-  cursor: pointer;
   background: #3a7afe;
   color: white;
-  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 /* -------------------- */
-/* HOME SCREEN (optional safety) */
+/* HOME SCREEN (SAFE UI) */
 /* -------------------- */
 .container {
   text-align: center;
@@ -103,6 +111,31 @@ body {
   background: #3a7afe;
   color: white;
   cursor: pointer;
+}
+
+/* -------------------- */
+/* MOBILE OPTIMIZATION */
+/* -------------------- */
+@media (max-width: 600px) {
+  .msg {
+    max-width: 85%;
+    font-size: 13px;
+  }
+
+  .input-bar {
+    padding: 8px;
+  }
+
+  .input-bar input {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  .input-bar button {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+}  cursor: pointer;
 }
 
 /* -------------------- */
