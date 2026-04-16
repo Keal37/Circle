@@ -2,46 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-
-  <title>CIRCLE Chat</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CIRCLE</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
+  <!-- ===================== -->
+  <!-- LOGIN -->
+  <!-- ===================== -->
+  <div id="login" style="display:flex; height:100vh; flex-direction:column; justify-content:center; align-items:center; gap:10px; background:#0f0f0f; color:white;">
+    <h2>DIGI LOGIN</h2>
+
+    <input id="digiId" placeholder="Enter Digi ID..." style="padding:12px; width:220px; border-radius:8px; border:none;" />
+
+    <button onclick="login()" style="padding:12px 18px; border:none; border-radius:8px; background:#3a7afe; color:white;">
+      Continue
+    </button>
+  </div>
+
+  <!-- ===================== -->
   <!-- DASHBOARD -->
-  <div id="dashboard" style="display:flex; height:100vh; flex-direction:column; justify-content:center; align-items:center; gap:10px; background:#0f0f0f; color:white;">
+  <!-- ===================== -->
+  <div id="dashboard" style="display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; gap:10px; background:#0f0f0f; color:white;">
 
     <h2>CIRCLE</h2>
 
-    <input
-      id="newCircle"
-      placeholder="Enter circle name..."
-      style="padding:12px; width:220px; border-radius:8px; border:none;"
-    />
+    <input id="newCircle" placeholder="Enter circle name..." style="padding:12px; width:220px; border-radius:8px; border:none;" />
 
-    <button
-      onclick="openCircle()"
-      style="padding:12px 18px; border:none; border-radius:8px; background:#3a7afe; color:white;"
-    >
+    <button onclick="openCircle()" style="padding:12px 18px; border:none; border-radius:8px; background:#3a7afe; color:white;">
       Enter Circle
     </button>
 
+    <!-- Recent circles -->
+    <div id="circleList" style="margin-top:20px; width:220px;"></div>
+
   </div>
 
-  <!-- CHAT (YOUR OLD APP WRAPPED INSIDE) -->
+  <!-- ===================== -->
+  <!-- CHAT -->
+  <!-- ===================== -->
   <div class="chat-wrapper" style="display:none;">
 
     <div class="top-bar">CIRCLE</div>
-
-    <div style="padding:10px; display:flex; gap:8px; background:#111;">
-      <input id="circleInput" placeholder="Join circle..." style="flex:1; padding:10px; border:none; border-radius:8px;" />
-      <button onclick="joinCircle()" style="padding:10px; border:none; border-radius:8px; background:#3a7afe; color:white;">
-        Join
-      </button>
-    </div>
 
     <div id="messages" class="messages"></div>
 
@@ -52,7 +56,10 @@
 
   </div>
 
+  <!-- SOCKET -->
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+  <!-- APP -->
   <script src="app.js"></script>
 
 </body>
