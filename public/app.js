@@ -1,20 +1,70 @@
 const socket = io("https://circle-backend-s7dz.onrender.com", {
-  transports: ["websocket"],
-  reconnection: true
+  transports: ["websocket"]
 });
 
 // --------------------
-// USERNAME
+// GLOBAL STATE
 // --------------------
-let username = prompt("Enter username:");
+let username = "";
+let currentCircle = "";
 
-if (!username || username.trim() === "") {
-  username = "anon";
+// --------------------
+// INIT APP
+// --------------------
+window.onload = () => {
+  const savedId = localStorage.getItem("digiId");
+
+  if (savedId) {
+    username = savedId;
+
+    // skip login
+    showDashboard();
+  } else {
+    showLogin();
+  }
+
+  renderCircles();
+};
+
+// --------------------
+// VIEW CONTROL
+// --------------------
+function showLogin() {
+  document.getElementById("login").style.display = "flex";
+  document.getElementById("dashboard").style.display = "none";
+  document.querySelector(".chat-wrapper").style.display = "none";
 }
 
-username = username.trim();
+function showDashboard() {
+  document.getElementById("login").style.display = "none";
+  document.getElementById("dashboard").style.display = "flex";
+  document.querySelector(".chat-wrapper").style.display = "none";
+}
 
+function showChat() {
+  document.getElementById("login").style.display = "none";
+  document.getElementById("dashboard").style.display = "none";
+  document.querySelector(".chat-wrapper").style.display = "flex";
+}
 
+// --------------------
+// LOGIN
+// --------------------
+function login() {
+  const input = document.getElementById("digiId");
+  const id = input.value.trim();
+
+  if (!id) return;
+
+  username = id;
+  localStorage.setItem("digiId", id);
+
+  showDashboard();
+}
+
+// --------------------
+// CIRCLE STORAGE
+// --------------------
 let circles = JSON.parse(localStorage.getItem("circles") || "[]");
 
 function saveCircle(circle) {
@@ -23,37 +73,74 @@ function saveCircle(circle) {
     localStorage.setItem("circles", JSON.stringify(circles));
   }
 }
-// --------------------
-// CIRCLE STATE
-// --------------------
-let currentCircle = localStorage.getItem("circle") || "";
 
 // --------------------
-// CONNECT + REJOIN
+// OPEN CIRCLE
 // --------------------
-socket.on("connect", () => {
-  console.log("CONNECTED:", socket.id);
+function openCircle() {
+  const input = document.getElementById("newCircle");
+  const circle = input.value.trim().toLowerCase();
 
-  if (currentCircle) {
-    socket.emit("joinCircle", currentCircle);
-  }
-});
+  if (!circle) return;
+
+  startChat(circle);
+}
+
+function openCircleFromList(circle) {
+  startChat(circle);
+}
+
+function startChat(circle) {
+  currentCircle = circle;
+
+  saveCircle(circle);
+  localStorage.setItem("circle", circle);
+
+  showChat();
+
+  socket.emit("joinCircle", circle);
+}
 
 // --------------------
-// JOIN CIRCLE
+// RENDER CIRCLE LIST
 // --------------------
-function joinCircle() {
-  const input = document.getElementById("circleInput");
+function renderCircles() {
+  const dashboard = document.getElementById("dashboard");
 
-  currentCircle = input.value.trim().toLowerCase();
+  // remove old list if exists
+  const old = document.getElementById("circleList");
+  if (old) old.remove();
 
-  if (!currentCircle) return;
+  if (circles.length === 0) return;
 
-  localStorage.setItem("circle", currentCircle);
+  const list = document.createElement("div");
+  list.id = "circleList";
+  list.style.marginTop = "20px";
+  list.style.width = "220px";
 
-  socket.emit("joinCircle", currentCircle);
+  const title = document.createElement("div");
+  title.innerText = "Recent Circles";
+  title.style.marginBottom = "10px";
+  title.style.opacity = "0.7";
 
-  input.value = "";
+  list.appendChild(title);
+
+  circles.forEach((c) => {
+    const item = document.createElement("div");
+
+    item.innerText = c;
+    item.style.padding = "10px";
+    item.style.marginBottom = "6px";
+    item.style.background = "#1a1a1a";
+    item.style.borderRadius = "8px";
+    item.style.cursor = "pointer";
+
+    item.onclick = () => openCircleFromList(c);
+
+    list.appendChild(item);
+  });
+
+  dashboard.appendChild(list);
 }
 
 // --------------------
@@ -61,7 +148,6 @@ function joinCircle() {
 // --------------------
 function send() {
   const input = document.getElementById("msg");
-
   const text = input.value.trim();
 
   if (!text || !currentCircle) return;
@@ -76,134 +162,41 @@ function send() {
 }
 
 // --------------------
-// RECEIVE MESSAGE (GROUPED LOGIC)
+// RECEIVE MESSAGE
 // --------------------
 socket.on("message", (data) => {
   const messages = document.getElementById("messages");
 
-  const lastBlock = messages.lastElementChild;
-
-  const isSameUser =
-    lastBlock &&
-    lastBlock.getAttribute("data-user") === data.username;
+  const div = document.createElement("div");
+  div.classList.add("msg");
 
   const time = new Date().toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit"
   });
 
-  // ------------------------
-  // CONTINUE EXISTING GROUP
-  // ------------------------
-  if (isSameUser) {
-    const body = lastBlock.querySelector(".msg-body");
-
-    const line = document.createElement("div");
-    line.innerText = data.text;
-    line.style.marginTop = "4px";
-
-    body.appendChild(line);
-
-    messages.scrollTop = messages.scrollHeight;
-    return;
-  }
-
-  // ------------------------
-  // NEW MESSAGE GROUP
-  // ------------------------
-  const block = document.createElement("div");
-  block.classList.add("msg");
-  block.setAttribute("data-user", data.username);
-
-  block.innerHTML = `
-    <div class="msg-user">${data.username}</div>
-
-    <div class="msg-body">
-      <div>${data.text}</div>
-    </div>
-
-    <div class="msg-time">${time}</div>
+  div.innerHTML = `
+    <div><b>${data.username}</b>: ${data.text}</div>
+    <div style="font-size:10px; opacity:0.5;">${time}</div>
   `;
 
-  // alignment + styling
   if (data.username === username) {
-    block.style.alignSelf = "flex-end";
-    block.style.background = "#3a7afe";
-    block.style.color = "white";
-  } else {
-    block.style.alignSelf = "flex-start";
+    div.style.alignSelf = "flex-end";
+    div.style.background = "#3a7afe";
+    div.style.color = "white";
   }
 
-  messages.appendChild(block);
+  messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
 });
 
-function openCircle() {
-  const input = document.getElementById("newCircle");
+// --------------------
+// SOCKET CONNECT
+// --------------------
+socket.on("connect", () => {
+  console.log("CONNECTED:", socket.id);
 
-  const circle = input.value.trim().toLowerCase();
-
-  if (!circle) return;
-
-  saveCircle(circle);
-
-  // set current circle
-  currentCircle = circle;
-  localStorage.setItem("circle", circle);
-
-  // hide dashboard
-  document.getElementById("dashboard").style.display = "none";
-
-  // show chat
-  document.querySelector(".chat-wrapper").style.display = "flex";
-
-  // join socket room
-  socket.emit("joinCircle", circle);
-}
-
-  function renderCircles() {
-  const dashboard = document.getElementById("dashboard");
-
-  const list = document.createElement("div");
-  list.style.marginTop = "20px";
-  list.style.width = "220px";
-
-  if (circles.length === 0) return;
-
-  list.innerHTML = "<h4 style='margin-bottom:10px;'>Recent Circles</h4>";
-
-  circles.forEach((c) => {
-    const item = document.createElement("div");
-
-    item.innerText = c;
-    item.style.padding = "10px";
-    item.style.marginBottom = "6px";
-    item.style.background = "#1a1a1a";
-    item.style.borderRadius = "8px";
-    item.style.cursor = "pointer";
-
-    item.onclick = () => {
-      openCircleFromList(c);
-    };
-
-    list.appendChild(item);
-  });
-
-  dashboard.appendChild(list);
+  if (currentCircle) {
+    socket.emit("joinCircle", currentCircle);
   }
-
-function openCircleFromList(circle) {
-  currentCircle = circle;
-  localStorage.setItem("circle", circle);
-
-  document.getElementById("dashboard").style.display = "none";
-  document.querySelector(".chat-wrapper").style.display = "flex";
-
-  socket.emit("joinCircle", circle);
-}
-window.onload = () => {
-  renderCircles();
-};
-
-
-
+});
