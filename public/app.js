@@ -336,3 +336,20 @@ socket.on("connect", () => {
     socket.emit("joinCircle", currentCircle);
   }
 });
+
+
+// ensure buttons work on mobile
+window.addEventListener("load", () => {
+  const sendBtn = document.querySelector(".input-bar button");
+  const input = document.getElementById("msg");
+
+  if (sendBtn) {
+    sendBtn.addEventListener("click", send);
+  }
+
+  if (input) {
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") send();
+    });
+  }
+});
