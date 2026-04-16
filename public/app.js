@@ -353,3 +353,8 @@ window.addEventListener("load", () => {
     });
   }
 });
+
+function logout() {
+  localStorage.clear();
+  location.reload();
+}
