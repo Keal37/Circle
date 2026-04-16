@@ -1,69 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CIRCLE</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <!-- ===================== -->
-  <!-- LOGIN -->
-  <!-- ===================== -->
-  <div id="login" style="display:flex; height:100vh; flex-direction:column; justify-content:center; align-items:center; gap:10px; background:#0f0f0f; color:white;">
-    <h2>DIGI LOGIN</h2>
+<!-- LOGIN -->
+<div id="login" class="screen">
+  <h2>Digi Login</h2>
+  <input id="digiId" placeholder="Enter ID">
+  <button onclick="login()">Continue</button>
+</div>
 
-    <input id="digiId" placeholder="Enter Digi ID..." style="padding:12px; width:220px; border-radius:8px; border:none;" />
+<!-- DASHBOARD -->
+<div id="dashboard" class="screen hidden">
+  <h2>CIRCLE</h2>
 
-    <button onclick="login()" style="padding:12px 18px; border:none; border-radius:8px; background:#3a7afe; color:white;">
-      Continue
-    </button>
+  <input id="newCircle" placeholder="Circle name">
+  <button onclick="openCircle()">Enter Circle</button>
+
+  <div id="circleList"></div>
+</div>
+
+<!-- CHAT -->
+<div class="chat hidden">
+  <div id="messages"></div>
+
+  <div class="input-bar">
+    <input id="msg" placeholder="Message">
+    <button id="sendBtn">Send</button>
   </div>
+</div>
 
-  <!-- ===================== -->
-  <!-- DASHBOARD -->
-  <!-- ===================== -->
-  <div id="dashboard" style="display:none; height:100vh; flex-direction:column; justify-content:center; align-items:center; gap:10px; background:#0f0f0f; color:white;">
+<button onclick="logout()" class="logout">Logout</button>
 
-    <h2>CIRCLE</h2>
-
-    <input id="newCircle" placeholder="Enter circle name..." style="padding:12px; width:220px; border-radius:8px; border:none;" />
-
-    <button onclick="openCircle()" style="padding:12px 18px; border:none; border-radius:8px; background:#3a7afe; color:white;">
-      Enter Circle
-    </button>
-
-    <!-- Recent circles -->
-    <div id="circleList" style="margin-top:20px; width:220px;"></div>
-
-  </div>
-
-  <!-- ===================== -->
-  <!-- CHAT -->
-  <!-- ===================== -->
-  <div class="chat-wrapper" style="display:none;">
-
-    <div class="top-bar">CIRCLE</div>
-
-    <div id="messages" class="messages"></div>
-
-    <div class="input-bar">
-      <input id="msg" placeholder="Type message..." />
-      <button>Send</button>
-    </div>
-
-  </div>
-  <button onclick="logout()" style="position:absolute; top:10px; right:10px;">
-  Logout
-  </button>
-
-  <!-- SOCKET -->
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-
-  <!-- APP -->
-  <script src="app.js"></script>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="app.js"></script>
 
 </body>
 </html>
