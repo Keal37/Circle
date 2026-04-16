@@ -3,17 +3,17 @@ const socket = io("https://circle-backend-s7dz.onrender.com", {
 });
 
 // --------------------
-// GLOBAL STATE
+// STATE
 // --------------------
 let username = "";
 let currentCircle = "";
 let currentDM = "";
-let mode = "group"; // group or dm
+let mode = "group";
 
 // --------------------
 // INIT
 // --------------------
-window.onload = () => {
+window.addEventListener("load", () => {
   const savedId = localStorage.getItem("digiId");
 
   if (savedId) {
@@ -25,7 +25,8 @@ window.onload = () => {
   }
 
   renderCircles();
-};
+  bindUI();
+});
 
 // --------------------
 // VIEW CONTROL
@@ -65,6 +66,9 @@ function login() {
   showDashboard();
 }
 
+// make login global for HTML onclick
+window.login = login;
+
 // --------------------
 // CIRCLES STORAGE
 // --------------------
@@ -86,14 +90,14 @@ function openCircle() {
 
   if (!circle) return;
 
-  startGroupChat(circle);
+  startGroup(circle);
 }
 
 function openCircleFromList(circle) {
-  startGroupChat(circle);
+  startGroup(circle);
 }
 
-function startGroupChat(circle) {
+function startGroup(circle) {
   mode = "group";
   currentCircle = circle;
 
@@ -107,11 +111,15 @@ function startGroupChat(circle) {
   socket.emit("joinCircle", circle);
 }
 
+// expose for HTML
+window.openCircle = openCircle;
+window.openCircleFromList = openCircleFromList;
+
 // --------------------
-// START DM
+// DM
 // --------------------
 function startDM() {
-  const target = prompt("Enter username to message:");
+  const target = prompt("Enter username:");
 
   if (!target || target === username) return;
 
@@ -123,8 +131,10 @@ function startDM() {
   showChat();
 }
 
+window.startDM = startDM;
+
 // --------------------
-// SEND MESSAGE
+// SEND MESSAGE (ONE SOURCE ONLY)
 // --------------------
 function send() {
   const input = document.getElementById("msg");
@@ -133,6 +143,8 @@ function send() {
   if (!text) return;
 
   if (mode === "group") {
+    if (!currentCircle) return;
+
     socket.emit("message", {
       circle: currentCircle,
       text,
@@ -141,6 +153,8 @@ function send() {
   }
 
   if (mode === "dm") {
+    if (!currentDM) return;
+
     socket.emit("dm", {
       to: currentDM,
       text,
@@ -151,14 +165,16 @@ function send() {
   input.value = "";
 }
 
+window.send = send;
+
 // --------------------
-// DISPLAY MESSAGE
+// MESSAGE RENDERING (ONLY ONE SYSTEM)
 // --------------------
 function displayMessage(data) {
   const messages = document.getElementById("messages");
 
   const div = document.createElement("div");
-  div.classList.add("msg");
+  div.className = "msg";
 
   const time = new Date().toLocaleTimeString([], {
     hour: "2-digit",
@@ -181,21 +197,15 @@ function displayMessage(data) {
 }
 
 // --------------------
-// RECEIVE GROUP
+// SOCKET EVENTS
 // --------------------
 socket.on("message", (data) => {
   if (mode !== "group") return;
   displayMessage(data);
 });
 
-// --------------------
-// RECEIVE DM
-// --------------------
 socket.on("dm", (data) => {
   if (mode !== "dm") return;
-
-  if (data.username !== currentDM && data.to !== currentDM) return;
-
   displayMessage(data);
 });
 
@@ -238,108 +248,12 @@ function renderCircles() {
   });
 
   dashboard.appendChild(list);
-}// RENDER CIRCLE LIST
-// --------------------
-function renderCircles() {
-  const dashboard = document.getElementById("dashboard");
-
-  // remove old list if exists
-  const old = document.getElementById("circleList");
-  if (old) old.remove();
-
-  if (circles.length === 0) return;
-
-  const list = document.createElement("div");
-  list.id = "circleList";
-  list.style.marginTop = "20px";
-  list.style.width = "220px";
-
-  const title = document.createElement("div");
-  title.innerText = "Recent Circles";
-  title.style.marginBottom = "10px";
-  title.style.opacity = "0.7";
-
-  list.appendChild(title);
-
-  circles.forEach((c) => {
-    const item = document.createElement("div");
-
-    item.innerText = c;
-    item.style.padding = "10px";
-    item.style.marginBottom = "6px";
-    item.style.background = "#1a1a1a";
-    item.style.borderRadius = "8px";
-    item.style.cursor = "pointer";
-
-    item.onclick = () => openCircleFromList(c);
-
-    list.appendChild(item);
-  });
-
-  dashboard.appendChild(list);
 }
 
 // --------------------
-// SEND MESSAGE
+// MOBILE SAFE BINDING
 // --------------------
-function send() {
-  const input = document.getElementById("msg");
-  const text = input.value.trim();
-
-  if (!text || !currentCircle) return;
-
-  socket.emit("message", {
-    circle: currentCircle,
-    text,
-    username
-  });
-
-  input.value = "";
-}
-
-// --------------------
-// RECEIVE MESSAGE
-// --------------------
-socket.on("message", (data) => {
-  const messages = document.getElementById("messages");
-
-  const div = document.createElement("div");
-  div.classList.add("msg");
-
-  const time = new Date().toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-
-  div.innerHTML = `
-    <div><b>${data.username}</b>: ${data.text}</div>
-    <div style="font-size:10px; opacity:0.5;">${time}</div>
-  `;
-
-  if (data.username === username) {
-    div.style.alignSelf = "flex-end";
-    div.style.background = "#3a7afe";
-    div.style.color = "white";
-  }
-
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-});
-
-// --------------------
-// SOCKET CONNECT
-// --------------------
-socket.on("connect", () => {
-  console.log("CONNECTED:", socket.id);
-
-  if (currentCircle) {
-    socket.emit("joinCircle", currentCircle);
-  }
-});
-
-
-// ensure buttons work on mobile
-window.addEventListener("load", () => {
+function bindUI() {
   const sendBtn = document.querySelector(".input-bar button");
   const input = document.getElementById("msg");
 
@@ -352,9 +266,25 @@ window.addEventListener("load", () => {
       if (e.key === "Enter") send();
     });
   }
+}
+
+// --------------------
+// SOCKET CONNECT
+// --------------------
+socket.on("connect", () => {
+  console.log("CONNECTED:", socket.id);
+
+  if (currentCircle) {
+    socket.emit("joinCircle", currentCircle);
+  }
 });
 
+// --------------------
+// LOGOUT
+// --------------------
 function logout() {
   localStorage.clear();
   location.reload();
 }
+
+window.logout = logout;
