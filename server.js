@@ -6,55 +6,33 @@ const app = express();
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: {
-    origin: "*",
-  },
-  transports: ["websocket"]
+  cors: { origin: "*" }
 });
 
 app.use(express.static("public"));
 
-// --------------------
-// USER SOCKET MAP
-// --------------------
-let users = {}; // username -> socket.id
+// username -> socket.id
+let users = {};
 
 io.on("connection", (socket) => {
   console.log("CONNECTED:", socket.id);
 
-  // --------------------
-  // REGISTER USER
-  // --------------------
+  // register user
   socket.on("register", (username) => {
     users[username] = socket.id;
-    console.log("REGISTER:", username);
   });
 
-  // --------------------
-  // JOIN GROUP
-  // --------------------
+  // join group
   socket.on("joinCircle", (circle) => {
-    const room = String(circle || "").trim().toLowerCase();
-    socket.join(room);
-    console.log("JOIN:", socket.id, room);
+    socket.join(circle);
   });
 
-  // --------------------
-  // GROUP MESSAGE
-  // --------------------
+  // group message
   socket.on("message", (data) => {
-    const room = String(data.circle || "").trim().toLowerCase();
-
-    io.to(room).emit("message", {
-      username: data.username,
-      text: data.text,
-      circle: room
-    });
+    io.to(data.circle).emit("message", data);
   });
 
-  // --------------------
-  // PRIVATE MESSAGE (REAL DM)
-  // --------------------
+  // private message
   socket.on("dm", (data) => {
     const targetSocket = users[data.to];
 
@@ -62,17 +40,11 @@ io.on("connection", (socket) => {
       io.to(targetSocket).emit("dm", data);
     }
 
-    // also send back to sender (so they see their own message)
     socket.emit("dm", data);
   });
 
-  // --------------------
-  // DISCONNECT
-  // --------------------
+  // cleanup
   socket.on("disconnect", () => {
-    console.log("DISCONNECTED:", socket.id);
-
-    // remove user
     for (let user in users) {
       if (users[user] === socket.id) {
         delete users[user];
@@ -82,7 +54,4 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-
-server.listen(PORT, () => {
-  console.log("CIRCLE running on port", PORT);
-});
+server.listen(PORT, () => console.log("CIRCLE running on", PORT));
